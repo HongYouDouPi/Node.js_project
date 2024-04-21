@@ -26,6 +26,7 @@ router.use(upload.single('file'));
 
 // 创建端点处理图片上传
 router.post('/', async (req, res) => {
+  console.log('file',req.file);
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }

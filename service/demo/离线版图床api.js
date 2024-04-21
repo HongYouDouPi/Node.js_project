@@ -3,7 +3,7 @@ const FormData = require('form-data');
 const fs = require('fs');
 
 // 由于图片位于与脚本相同的目录中，只需直接使用文件名即可
-const filePath = 'service\\Boy.png';
+const filePath = 'service\\Coffee.png';
 
 const uploadImageToFreeimg = async (filePath) => {
   const form = new FormData();

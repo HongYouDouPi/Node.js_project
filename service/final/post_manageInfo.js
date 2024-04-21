@@ -66,9 +66,17 @@ router.post('/edit', (req, res) => {
 });
 
 router.post('/del', (req, res) => {
-    const delId = req.body;
-    console.log('需要删除的管理员数据', delId);
-    pool.query()
+    const id = req.body.id;
+    console.log('需要删除的管理员数据', id);
+    pool.query('delete from manages where manage_id = ?',id , (error,results) => {
+        if (error) {
+          console.error('Error del manageinfo:', error);
+          res.status(500).json({ message: 'Error del manageinfo' });
+          return;
+        }
+        console.log('del manageinfo successfully');
+        res.status(200).json({ message: 'del manageinfo successfully', results: results });
+      })
 
 })
 

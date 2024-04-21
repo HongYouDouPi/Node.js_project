@@ -9,10 +9,11 @@ const post_userEdit = require('./post_user');
 const upload_image = require('./upload_image');
 const get_userInfo = require('./get_userInfo');
 const get_lecturesInfo = require('./get_lecturesInfo');
-
-// 修改
 const get_manageInfo = require('./get_manageInfo');
 const post_manageInfo = require('./post_manageInfo');
+
+// 修改
+const post_bookingInfo = require('./post_bookingInfo');
 
 
 const app = express();
@@ -37,6 +38,10 @@ app.use('/userEdit', post_userEdit);
 app.use('/manageInfo', get_manageInfo);
 // 编辑管理员信息
 app.use('/manageEdit', post_manageInfo);
+// 上传预约
+app.use('/booking', post_bookingInfo);
+
+
 
 // 处理根路径的 GET 请求，返回一个简单的欢迎消息
 app.get('/', (req, res) => {
