@@ -7,22 +7,22 @@ const cors = require('cors');
 const router = express.Router();
 // 设置中间件
 router.use(cors());
-    // 添加解析请求体
-router.use(express.json()); 
+// 添加解析请求体
+router.use(express.json());
 
 // 创建数据库连接池
 const pool = mysql.createPool({
-    connectionLimit : 10,
-    host : 'localhost',
-    user : 'root',
-    password : '123456',
-    database : 'lecture'
+    connectionLimit: 10,
+    host: 'localhost',
+    user: 'root',
+    password: '123456',
+    database: 'lecture'
 })
 
 // 从数据库中查询讲座信息 返回给data再返回给前端
-router.get('/',(req,res)=>{
+router.get('/', (req, res) => {
     // 检查是否有传递 lecture_id 参数
-    console.log('请求路由为',req.query)
+    console.log('请求路由为', req.query)
     const lectureId = req.query.lecture_id;
     if (lectureId) {
         // 开启一个特定连接
@@ -100,12 +100,27 @@ router.get('/',(req,res)=>{
 })
 
 
-router.get('/jion',(req,res) =>{
-
+router.get('/jion', (req, res) => {
+    const data = req.query;
+    console.log(data);
 })
 
-router.get('/publish',(req,res) => {
-    const id = req.query;
-    console.log('id',id);
+router.get('/publish', (req, res) => {
+    const id = req.query.student_id;
+    console.log('id', id);
+    // SQL 查询语句
+    const query = 'SELECT * FROM lectures WHERE student_id = ?';
+    // 执行 SQL 查询
+    pool.query(query, [id], (error, results) => {
+        if (error) {
+            // 如果发生错误，向前端发送错误信息
+            console.error(`Error select lectures from ${id}`, error);
+            res.status(500).send(`Error select lectures from ${id}`);
+            return;
+        }
+        // 如果查询成功，将结果数组发送回前端
+        res.status(200).json(results);
+    });
 })
+
 module.exports = router;

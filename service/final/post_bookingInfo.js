@@ -5,14 +5,14 @@ const express = require('express')
 const router = express.Router();
 router.use(cors());
 // 添加解析请求体的中间件
-router.use(express.json()); 
+router.use(express.json());
 
 const pool = mysql.createPool({
-    connectionLimit : 10,
-    host : 'localhost',
-    user : 'root',
-    password : '123456',
-    database : 'lecture'
+    connectionLimit: 10,
+    host: 'localhost',
+    user: 'root',
+    password: '123456',
+    database: 'lecture'
 })
 
 function checkBookingExists(lectureId, studentId, callback) {
@@ -26,13 +26,13 @@ function checkBookingExists(lectureId, studentId, callback) {
 }
 
 // 添加预约
-router.post('/add',(req,res) => {
+router.post('/add', (req, res) => {
     const data = req.query;
-    let studentId  = data.student_id;
-    let lectureId  = data.lecture_id;
+    let studentId = data.student_id;
+    let lectureId = data.lecture_id;
     // console.log('obtain data:',data,lecture_id,student_id);
     const queryLecture = 'SELECT lecture_name FROM lectures WHERE lecture_id = ?';
-    pool.query(queryLecture,lectureId,(error,results) => {
+    pool.query(queryLecture, lectureId, (error, results) => {
         if (error) {
             // 处理查询错误
             console.error('Error fetching lecture name:', error);
@@ -44,12 +44,12 @@ router.post('/add',(req,res) => {
             res.status(404).send('Lecture not found');
             return;
         }
-        const lectureName  = results[0].lecture_name;
+        const lectureName = results[0].lecture_name;
 
         // 然后，插入预约信息
-        const insertBooking = 'INSERT INTO bookings (student_id, lecture_id, jion_status,lecture_name) VALUES (?, ?, ? , ?)';
+        const insertBooking = 'INSERT INTO bookings (student_id, lecture_id, join_status,lecture_name) VALUES (?, ?, ? , ?)';
 
-        pool.query(insertBooking, [studentId, lectureId, 0 ,lectureName], (error, results) => {
+        pool.query(insertBooking, [studentId, lectureId, 0, lectureName], (error, results) => {
             if (error) {
                 // 处理插入错误
                 console.error('Error inserting booking:', error);
@@ -66,13 +66,13 @@ router.post('/add',(req,res) => {
 })
 
 // 取消预约
-router.post('/del',(req,res) => {
+router.post('/del', (req, res) => {
     const data = req.query;
     let studentId = data.student_id;
     let lectureId = data.lecture_id;
     // console.log('obtain data:',data,lecture_id,student_id);
-    const delLecture = 'delete from bookings where lecture_id = ? AND user_id = ?';
-    pool.query(delLecture,[lectureId,studentId],(error,results) => {
+    const delLecture = 'delete from bookings where lecture_id = ? AND student_id = ?';
+    pool.query(delLecture, [lectureId, studentId], (error, results) => {
         if (error) {
             // 处理查询错误
             console.error('Error del lecture:', error);
@@ -89,13 +89,27 @@ router.post('/del',(req,res) => {
     })
 })
 
-// 查找当前的用户是否预约
-router.get('/search',(req,res) => {
+router.post('/clock',(req,res) => {
+    const data = req.body;
+    console.log(data);
+    pool.query('UPDATE bookings SET join_status = ? WHERE student_id = ? AND lecture_id = ?', ['1', data.student_id, data.lecture_id],(error,results) => {
+        if (error) {
+            console.error('更新失败:', error);
+            res.status(500).send('更新失败');
+        } else {
+            console.log('更新成功');
+            res.status(200).send('更新成功');
+        }
+    })
+})
+
+// 查找当前的用户是否预约 lectureDetail页面
+router.get('/search', (req, res) => {
     const data = req.query;
-    console.log('search booking data',data)
+    console.log('search booking data', data)
     let studentId = data.student_id;
     let lectureId = data.lecture_id;
-    if(studentId&&lectureId){
+    if (studentId && lectureId) {
         checkBookingExists(lectureId, studentId, (error, exists) => {
             if (error) {
                 // 处理错误
@@ -105,19 +119,19 @@ router.get('/search',(req,res) => {
             if (!exists) {
                 console.log(`${studentId} Booking ${lectureId} not exist`)
                 let isBooking = false;
-                return res.json({isBooking});
+                return res.json({ isBooking });
             } else {
                 // 预约存在
                 console.log(`${studentId} Booking ${lectureId} exist`)
                 let isBooking = true;
-                return res.json({isBooking});
+                return res.json({ isBooking });
             }
         });
     }
-    else{
+    else {
         let isBooking = true;
         console.log('studentId&&lectureId error');
-        return res.status(501).send('searchBooking error').json({isBooking});
+        return res.send('searchBooking error').json({ isBooking });
     }
 })
 

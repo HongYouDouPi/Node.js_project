@@ -11,9 +11,10 @@ const get_userInfo = require('./get_userInfo');
 const get_lecturesInfo = require('./get_lecturesInfo');
 const get_manageInfo = require('./get_manageInfo');
 const post_manageInfo = require('./post_manageInfo');
+const post_bookingInfo = require('./post_bookingInfo');
 
 // 修改
-const post_bookingInfo = require('./post_bookingInfo');
+const get_bookingInfo = require('./get_bookingInfo');
 
 
 const app = express();
@@ -40,6 +41,9 @@ app.use('/manageInfo', get_manageInfo);
 app.use('/manageEdit', post_manageInfo);
 // 上传预约
 app.use('/booking', post_bookingInfo);
+// 获取预约
+app.use('/bookInfo', get_bookingInfo);
+
 
 
 
