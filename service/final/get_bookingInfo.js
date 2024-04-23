@@ -4,7 +4,7 @@ const express = require('express')
 
 const router = express.Router();
 router.use(cors());
-// Ìí¼Ó½âÎöÇëÇóÌåµÄÖÐ¼ä¼þ
+// æ·»åŠ è§£æžè¯·æ±‚ä½“çš„ä¸­é—´ä»¶
 router.use(express.json());
 
 const pool = mysql.createPool({
@@ -16,14 +16,14 @@ const pool = mysql.createPool({
 })
 
 
-// ²éÕÒµ±Ç°µÄÓÃ»§ÊÇ·ñÔ¤Ô¼
+// æŸ¥æ‰¾å½“å‰çš„ç”¨æˆ·æ˜¯å¦é¢„çº¦
 router.get('/', (req, res) => {
     const data = req.query;
 
     let studentId = data.student_id;
     let style = data.style;
     // console.log('style',studentId,style)
-    // ²éÑ¯ bookings ±íÖÐº¬ÓÐµ±Ç° studentId µÄÏî
+    // æŸ¥è¯¢ bookings è¡¨ä¸­å«æœ‰å½“å‰ studentId çš„é¡¹
     const baseQuery = `SELECT lecture_id FROM bookings WHERE student_id = ?`;
     let query = '';
     if (style == 'all') {
@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
         query = baseQuery + ' AND join_status = 1';
         console.log('style == finish')
     } else if (style == 'jion') {
-        //ÕâÀïÉ¸Ñ¡lectureÖÐjoin_status = 0µÄ È»ºó·µ»Ø¸øÇ°¶Ë
+        //è¿™é‡Œç­›é€‰lectureä¸­join_status = 0çš„ ç„¶åŽè¿”å›žç»™å‰ç«¯
         query = baseQuery + ' AND join_status = 0';
         console.log('style == jion')
     }
@@ -44,11 +44,11 @@ router.get('/', (req, res) => {
             res.status(500).json({ error: 'Internal server error' });
             return;
         }
-        // ÌáÈ¡ËùÓÐµÄ lecture_id
+        // æå–æ‰€æœ‰çš„ lecture_id
         const lectureIds = results.map(result => result.lecture_id);
         console.log(lectureIds.length);
         if (lectureIds.length > 0) {
-            // Ê¹ÓÃ lectureIds ²éÑ¯ lectures ±í
+            // ä½¿ç”¨ lectureIds æŸ¥è¯¢ lectures è¡¨
             const lecturesQuery = `SELECT * FROM lectures WHERE lecture_id IN (?)`;
             pool.query(lecturesQuery, [lectureIds], (lecturesError, lecturesResults) => {
                 if (lecturesError) {
@@ -56,7 +56,7 @@ router.get('/', (req, res) => {
                     res.status(500).json({ error: 'Mysql error searching lectures' });
                     return;
                 }
-                // ½«²éÑ¯½á¹û·¢ËÍ¸øÇ°¶Ë
+                // å°†æŸ¥è¯¢ç»“æžœå‘é€ç»™å‰ç«¯
 
                 res.json({ lecture: lecturesResults });
             });
@@ -64,6 +64,82 @@ router.get('/', (req, res) => {
         else
             res.json({});
     });
+})
+
+// åŽå°æ˜¾ç¤ºæ‰€æœ‰çš„é¢„çº¦
+router.use('/all', (req, res) => {
+    let query = 'SELECT * FROM bookings'
+    pool.query(query, (error, results) => {
+        //å°†æŸ¥è¯¢æˆåŠŸçš„ç»“æžœè¿”å›žç»™å‰ç«¯
+        if (error) {
+            console.error('select all bookingsInfo error')
+            res.status(500).json({ error: 'select all bookingsInfo error' })
+            return;
+        }
+        // console.error('select all bookingsInfo:',results)
+        res.json(results);
+    })
+})
+
+// åŽå°æ·»åŠ é¢„çº¦
+router.post('/add', (req, res) => {
+    let data = req.body.data;
+    console.log(data);
+
+    if (!data.student_id || !data.lecture_id) {
+        res.status(400).json({ error: 'Both student_id and lecture_id are required' });
+        return;
+    }
+
+    pool.query('INSERT INTO bookings (student_id ,lecture_id , join_status) VALUES (?, ?, ?) ', [data.student_id, data.lecture_id, 0], (error, results) => {
+        if (error) {
+            console.error('del bookingsInfo error')
+            res.status(500).json({ error: 'del bookingsInfo error' })
+            return;
+        }
+        console.error('del bookingsInfo', results)
+        res.json({ message: 'Booking added successfully' });
+    })
+})
+
+// åˆ é™¤é¢„çº¦
+router.post('/del', (req, res) => {
+    let data = req.body;
+    console.log(data);
+    let id = data.id;
+
+    if (!id) {
+        res.status(400).json({ error: 'booking_id is required' });
+        return;
+    }
+
+    //åœ¨bookingsè¡¨ä¸­æ‰¾åˆ°booking_idä¸ºidçš„å€¼çš„é¡¹ åˆ é™¤
+    let query = 'delete FROM bookings where booking_id = ?'
+    pool.query(query, [id], (error, results) => {
+        if (error) {
+            console.error('del bookingsInfo error')
+            res.status(500).json({ error: 'del bookingsInfo error' })
+            return;
+        }
+        console.error('del bookingsInfo', results)
+        res.json(results);
+    })
+})
+
+router.get('/studentId', (req, res) => {
+    let data = req.query;
+    console.log('data.lecture_id,',data)
+    let lecture_id = data.lecture_id;
+    pool.query('Select * from bookings WHERE lecture_id = ?', lecture_id, (error, results) => {
+        if (error) {
+            console.error('Select * from bookings WHERE lecture_id error')
+            res.status(500).json({ error: 'Select * from bookings WHERE lecture_id error' })
+            return;
+        }
+        console.log('data.lecture_id,results',results)
+
+        res.json(results);
+    })
 })
 
 module.exports = router;

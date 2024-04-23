@@ -5,11 +5,14 @@ const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
+const cors = require('cors')
+
 // const app = express();
 // const bodyParser = require('body-parser');
 // 引入 mysql 模块
 // const mysql = require('mysql');
 // const port = 8080;
+router.use(cors())
 
 // 配置 multer，设置上传的文件存储位置
 const storage = multer.diskStorage({
@@ -26,14 +29,14 @@ router.use(upload.single('file'));
 
 // 创建端点处理图片上传
 router.post('/', async (req, res) => {
-  console.log('file',req.file);
+  console.log('file', req.file);
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
   // 上传到图床
   const form = new FormData();
   form.append('file', fs.createReadStream(req.file.path));
-  
+
   try {
     const response = await axios.post('https://www.freeimg.cn/api/v1/upload', form, {
       headers: {
@@ -43,8 +46,8 @@ router.post('/', async (req, res) => {
       }
     });
 
-     // 输出图床 API 返回的信息到后端控制台
-  console.log("图床 API 返回的信息:", response.data);
+    // 输出图床 API 返回的信息到后端控制台
+    console.log("图床 API 返回的信息:", response.data);
 
     // 删除服务器上的临时文件
     fs.unlinkSync(req.file.path);

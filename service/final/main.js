@@ -12,6 +12,7 @@ const get_lecturesInfo = require('./get_lecturesInfo');
 const get_manageInfo = require('./get_manageInfo');
 const post_manageInfo = require('./post_manageInfo');
 const post_bookingInfo = require('./post_bookingInfo');
+const imageInfo = require('./imageInfo')
 
 // 修改
 const get_bookingInfo = require('./get_bookingInfo');
@@ -43,7 +44,8 @@ app.use('/manageEdit', post_manageInfo);
 app.use('/booking', post_bookingInfo);
 // 获取预约
 app.use('/bookInfo', get_bookingInfo);
-
+// 获取首页轮播图
+app.use('/imageInfo', imageInfo);
 
 
 
