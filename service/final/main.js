@@ -19,11 +19,11 @@ const get_bookingInfo = require('./get_bookingInfo');
 
 
 const app = express();
-const port = 8080;
+const port = 45065;
 
 app.use(bodyParser.json());
 
-  // 所有路由
+// 所有路由
 // 用户登陆
 app.use('/lecturelogin', lecturelogin);
 // 用户发布讲座
@@ -51,9 +51,9 @@ app.use('/imageInfo', imageInfo);
 
 // 处理根路径的 GET 请求，返回一个简单的欢迎消息
 app.get('/', (req, res) => {
-    res.send('Welcome to Lecture App!');
-  });
+  res.send('Welcome to Lecture App!');
+});
 
-app.listen(port, () => {
+app.listen(port,'0.0.0.0', () => {
   console.log(`Server is running on main. http://localhost:${port}`);
 });
